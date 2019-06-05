@@ -4,12 +4,12 @@
 
 ### Installing the Image
 
-The following image is recommended.
-Raspbian Stretch with desktop
-Image with desktop based on Debian Stretch
-Version: April 2019
-Release date: 2019-04-08
-Kernel version: 4.14
+The following image is recommended.  
+Raspbian Stretch with desktop  
+Image with desktop based on Debian Stretch  
+Version: April 2019  
+Release date: 2019-04-08  
+Kernel version: 4.14  
 
 ### Download from the below address:
 https://downloads.raspberrypi.org/raspbian_latest
