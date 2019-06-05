@@ -1,6 +1,6 @@
 # CPH
 
-# Raspberry Pi Prerequisites
+## Raspberry Pi Prerequisites
 
 ### Installing the Image
 
