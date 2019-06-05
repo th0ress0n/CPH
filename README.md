@@ -4,7 +4,7 @@
 
 ### Installing the Image
 
-The following image is recommended:
+The following image is recommended:  
 **Raspbian Stretch with desktop**  
 Image with desktop based on Debian Stretch  
 Version: **April 2019**  

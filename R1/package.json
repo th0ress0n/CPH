@@ -1,0 +1,19 @@
+{
+  "name": "r1",
+  "version": "1.0.0",
+  "description": "CPH experience build - room 1",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/th0ress0n/CPH.git"
+  },
+  "author": "Per Thoresson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/th0ress0n/CPH/issues"
+  },
+  "homepage": "https://github.com/th0ress0n/CPH#readme"
+}
