@@ -7,11 +7,17 @@ $(function() {
     var $debug = $('.debug');
 
     var stateLog = new Array();
-    var currentState = "INIT"
+    var currentState = Constants.STATE_INIT;
 
     var socket = io();
     var connected = false;
 
+
+
+    // startup activities
+    if(Constants.MODE_DEBUG){ $debug.hide() }else{ $debug.show() }
+
+    function getLastState(){ return stateLog[stateLog.length-1]; }
 
     function logStateChange(state){
         stateLog.push(state)
@@ -23,7 +29,42 @@ $(function() {
 
     function setState(data) {
         // handle the different experience states 
-        
+        currentState = data.state
+
+        switch (currentState) {
+            case Constants.STATE_INIT:
+
+            break;
+            case Constants.STATE_ROOM_READY:
+
+            break;
+            case Constants.STATE_ROOM_ENTERED:
+
+            break;
+            case Constants.STATE_ROOM_ENTERED_UNSEATED:
+                // manage prompting cycle and audio volume increase
+
+            break;
+            case Constants.STATE_ROOM_USER_SEATED:
+                // snap photo and process for overlay
+            break;
+            case Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE:
+
+            break;
+            case Constants.STATE_ROOM_TV_ACTIVATED:
+                // Start video - stop all sensor processing until video is done.
+            break;
+            case Constants.STATE_ROOM_VIDEO_PLAYING:
+
+            break;
+            case Constants.STATE_ROOM_VIDEO_FINISHED:
+
+            break;
+            case Constants.STATE_ROOM_EXIT_SEQUENCE:
+                // Play audio sequence - set timer for post exit reset.
+
+            break;
+        }
         // append to history
         logStateChange(data.state)
     }

@@ -13,5 +13,15 @@ module.exports = {
 
     API_BASE_PATH                           : "",
     MODE_DEBUG                              : false,
+
+    AUDIO_PLEASE_SIT_ROOM_1                 : "SIT DOWN ROOM 1",
+    AUDIO_PLEASE_EXIT_ROOM_1                : "EXIT ROOM 1",
+    AUDIO_ACTIVATE_TV_ROOM_1                : "TV ROOM 1",
+    AUDIO_TURN_ON_LIGHT                     : "TURN ON LIGHT",
+    AUDIO_TURN_ON_AC                        : "TURN ON AC",
+    AUDIO_ACTIVATE_TV_ROOM_1                : "TV ROOM 2",
+    AUDIO_PLEASE_SIT_ROOM_2                 : "SIT DOWN ROOM 2",
+    AUDIO_PLEASE_EXIT_ROOM_2                : "EXIT ROOM 2",
+
     
 }
