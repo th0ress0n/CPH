@@ -1,14 +1,12 @@
-## Room 1 - CPH
+## CPH - Room 1
 
-```installation:
+Setup build:
+```
 npm install
 ```
 
+### Room 1 - Hardware checklist:
 
-
-### Project Hardware checklist:
-
-#### R1
 * 1x Raspberry Pi 3 Model B+
 * 1x Class 10 SD card - 16Gb or larger.
 * 1x GPIO Bridge
