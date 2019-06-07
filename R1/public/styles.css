@@ -18,8 +18,13 @@
 
 .videoContainer{
     width: 100%;
-    height: auto;
+    height: 100%;
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#my-player{
+    width:100%!important;
+    height: 100%!important;
 }
