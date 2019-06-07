@@ -13,7 +13,7 @@ $(function() {
         STATE_ROOM_EXIT_SEQUENCE                : "ROOM EXIT SEQUENCE",
 
         API_BASE_PATH                           : "",
-        MODE_DEBUG                              : false,
+        MODE_DEBUG                              : true,
 
         AUDIO_PLEASE_SIT_ROOM_1                 : "SIT DOWN ROOM 1",
         AUDIO_PLEASE_EXIT_ROOM_1                : "EXIT ROOM 1",
@@ -23,12 +23,21 @@ $(function() {
         AUDIO_ACTIVATE_TV_ROOM_2                : "TV ROOM 2",
         AUDIO_PLEASE_SIT_ROOM_2                 : "SIT DOWN ROOM 2",
         AUDIO_PLEASE_EXIT_ROOM_2                : "EXIT ROOM 2",
+
+        SENSOR_DOOR_TOLERANCE_DIST              : 3000,
+        SENSOR_DOOR_TOL_DURATION                : 1200,
+
+        SENSOR_SEAT_TOLERANCE_DIST              :
     }
     
     // Initialize variables
     var $window = $(window);
 
-    var $debug = $('.debug');
+    var $debug = $('.debugger');
+    var $debugState = $('.stateField');
+
+    var seated = false;                         // Used to handle audio loop to seat user after entering the room
+    var tv_activated = false;
 
     var stateLog = new Array();
     var currentState = Constants.STATE_INIT;
@@ -37,33 +46,39 @@ $(function() {
     var connected = false;
     
     // load video
-    var player = new Clappr.Player({source: "http://your.video/here.mp4", parentId: "#player"});
+    var player = new Clappr.Player({source: "./video/HKFA 29th Pt3.mp4", parentId: "#player",width:"100%", height:"100%"});
 
     // startup activities
-    if(Constants.MODE_DEBUG){ $debug.hide() }else{ $debug.show() }
+    if(Constants.MODE_DEBUG){ $debug.show() }else{ $debug.hide() }
 
     function getLastState(){ return stateLog[stateLog.length-1]; }
 
     function logStateChange(state){
+        
+        if(Constants.MODE_DEBUG){$debugState.html("State: "+state)}
         stateLog.push(state)
         // maintain a history of 5 only
         while (stateLog.length > 5) {
             stateLog.shift();
         }
+        if(Constants.MODE_DEBUG){console.log("State changed to "+state)}
     }
 
-    function setState(data) {
+    function setState(state) {
         // handle the different experience states 
-        currentState = data.state
+        currentState = state
 
         switch (currentState) {
             case Constants.STATE_INIT:
-
+                // Check that all is setup and ready to go: 
+                // If ready - move to next step ->
+                setTimeout(function(){ setState(Constants.STATE_ROOM_READY) }, 3000);
             break;
             case Constants.STATE_ROOM_READY:
-
+                // init Door sensor and start listening for entrants.
             break;
             case Constants.STATE_ROOM_ENTERED:
+                // Audio to prompt user to sit down.
 
             break;
             case Constants.STATE_ROOM_ENTERED_UNSEATED:
@@ -91,8 +106,12 @@ $(function() {
             break;
         }
         // append to history
-        logStateChange(data.state)
+        logStateChange(state)
     }
+
+
+    // FUDGE THE START
+    setState(Constants.STATE_INIT);
 
 
     // ----- Socket handling ---------------------------
