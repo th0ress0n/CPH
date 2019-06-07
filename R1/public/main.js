@@ -35,7 +35,8 @@ $(function() {
 
     var socket = io();
     var connected = false;
-
+    
+    // load video
     var player = new Clappr.Player({source: "http://your.video/here.mp4", parentId: "#player"});
 
     // startup activities
