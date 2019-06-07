@@ -76,10 +76,16 @@ $(function() {
             break;
             case Constants.STATE_ROOM_READY:
                 // init Door sensor and start listening for entrants.
+                setTimeout(function(){ setState(Constants.STATE_ROOM_ENTERED) }, 3000); // temp
             break;
             case Constants.STATE_ROOM_ENTERED:
                 // Audio to prompt user to sit down.
 
+                // start listening for seating sensor to trigger
+
+                // once audio is played -> if no trigger is tripped, start the audio prompting loop with increased audio for each iteration.
+
+                setTimeout(function(){ setState(Constants.STATE_ROOM_ENTERED_UNSEATED) }, 3000); // temp
             break;
             case Constants.STATE_ROOM_ENTERED_UNSEATED:
                 // manage prompting cycle and audio volume increase
