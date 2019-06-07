@@ -16,18 +16,26 @@ $(function() {
         MODE_DEBUG                              : true,
 
         AUDIO_PLEASE_SIT_ROOM_1                 : "SIT DOWN ROOM 1",
+        TRACK_PLEASE_SIT_ROOM_1                 : "./audio/Please take a seat.mp3",
         AUDIO_PLEASE_EXIT_ROOM_1                : "EXIT ROOM 1",
+        TRACK_PLEASE_EXIT_ROOM_1                : "./audio/Please exit the room.mp3",
         AUDIO_ACTIVATE_TV_ROOM_1                : "TV ROOM 1",
+        TRACK_ACTIVATE_TV_ROOM_1                : "./audio/Please turn on the television..mp3",
         AUDIO_TURN_ON_LIGHT                     : "TURN ON LIGHT",
+        TRACK_TURN_ON_LIGHT                     : "./audio/Please turn on the light.mp3",
         AUDIO_TURN_ON_AC                        : "TURN ON AC",
+        TRACK_TURN_ON_AC                        : "./audio/Please turn on the air conditioning.mp3",
         AUDIO_ACTIVATE_TV_ROOM_2                : "TV ROOM 2",
+        TRACK_ACTIVATE_TV_ROOM_2                : "./audio/Please turn on the television..mp3",
         AUDIO_PLEASE_SIT_ROOM_2                 : "SIT DOWN ROOM 2",
+        TRACK_PLEASE_SIT_ROOM_2                 : "./audio/Please take a seat.mp3",
         AUDIO_PLEASE_EXIT_ROOM_2                : "EXIT ROOM 2",
+        TRACK_PLEASE_EXIT_ROOM_2                : "./audio/Please exit the room.mp3",
 
         SENSOR_DOOR_TOLERANCE_DIST              : 3000,
         SENSOR_DOOR_TOL_DURATION                : 1200,
 
-        SENSOR_SEAT_TOLERANCE_DIST              :
+        SENSOR_SEAT_TOLERANCE_DIST              : 3000
     }
     
     // Initialize variables
@@ -118,6 +126,24 @@ $(function() {
 
     // FUDGE THE START
     setState(Constants.STATE_INIT);
+
+    // --------- Audio Handling ------------------------
+
+    function playAudio(track, volume){
+        var sound = new Howl({
+            src: [track],
+            volume: volume,
+        });
+        
+        sound.once('load', function(){
+            sound.play();
+        });
+        
+        sound.on('end', function(){
+            console.log('Finished!');
+            // handle next depending on state
+        });
+    }
 
 
     // ----- Socket handling ---------------------------
