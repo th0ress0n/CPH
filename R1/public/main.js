@@ -53,7 +53,8 @@ $(function() {
     var stateLog = new Array();
     var currentState = Constants.STATE_INIT;
 
-    var socket = io();
+    // var socket = io();
+    const socket = io.connect("http://localhost:3000", { secure: false, reconnect: true, rejectUnauthorized: false });
     var connected = false;
     var userSeated = false;
     
@@ -94,12 +95,12 @@ $(function() {
                 // Check that all is setup and ready to go: 
                 // If ready - move to next step ->
                 context.resume()
-                setTimeout(function(){ setState(Constants.STATE_ROOM_READY) }, 3000);
+                // setTimeout(function(){ setState(Constants.STATE_ROOM_READY) }, 3000);
                 socket.emit('state', Constants.STATE_INIT);
             break;
             case Constants.STATE_ROOM_READY:
                 // init Door sensor and start listening for entrants.
-                setTimeout(function(){ setState(Constants.STATE_ROOM_ENTERED) }, 3000); // temp
+                
             break;
             case Constants.STATE_ROOM_ENTERED:
                 // Audio to prompt user to sit down.
@@ -195,11 +196,12 @@ $(function() {
     });
 
     socket.on('state changed', (data) => {
+        console.log("RECEIVED STATE CHANGE FROM SERVER!")
         setState(data);
     });
 
     socket.on('init', (data) => {
-        console.log("init")
+        console.log("init : "+data)
         setState(Constants.STATE_INIT);
     });
 
@@ -208,17 +210,28 @@ $(function() {
         connected = false;
       });
     
-      socket.on('reconnect', () => {
+    socket.on('reconnect', () => {
         console.log('you have been reconnected');
-        connected = true;
         // If connected is true
-        socket.emit('startup', "init");
-        setState(Constants.STATE_INIT);
-      });
-    
-      socket.on('reconnect_error', () => {
+        if(!connected){
+            socket.emit('startup', "init");
+            connected = true;
+        }
+    });
+
+    socket.on('reconnect_error', () => {
         console.log('attempt to reconnect has failed');
         connected = false;
-      });
+    });
+
+    socket.on('connection', function() { 
+        console.log("client connected");
+        connected = true;
+        socket.emit('startup', "init");
+    });
+
+    socket.on('connect_error', function(err) { console.log("client connect_error: ", err) });
+
+    socket.on('connect_timeout', function(err) { console.log("client connect_timeout: ", err) });
 
 });

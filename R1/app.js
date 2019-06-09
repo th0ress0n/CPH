@@ -28,7 +28,6 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var server = require('http').createServer(app);
-// var io = require('../..')(server);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 
@@ -44,24 +43,26 @@ server.listen(port, () => { console.log('Server listening at port %d', port) });
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+
 // setup the socket...
 io.on('connection', (socket) => {
 
     sockRef = socket
 
+    socket.volatile.emit('init', Constants.STATE_ROOM_READY);
+
     // Bounce to startup ->
     socket.on('startup', (data) => {
-        console.log("startup")
-        socket.broadcast.emit('init', {
-            init: true
-        });
+        console.log("startup "+data)
+        socket.emit('init', "init");
     });
 
     socket.on('state', (data) => {
+        console.log("STATE -->> "+data)
         switch(data){
             case Constants.STATE_INIT:
                 // configure door sensor and start messuring
-                startDoorWatching();
+                doorWatch()
             break;
             case Constants.STATE_ROOM_READY:
 
@@ -91,8 +92,7 @@ io.on('connection', (socket) => {
 
             break;
         }
-    });     
-
+    });
 
     
   
@@ -103,7 +103,13 @@ io.on('connection', (socket) => {
 });
 
 
-function startDoorWatching(){
-    console.log("---->>>>")
-    sockRef.broadcast.emit('state changed', Constants.STATE_ROOM_READY);
+function doorWatch(){
+    console.log("DOORWATCH")
+    /*
+    Setup listener for the GPIO and the door sensor
+    incomming signal is located on PIN ?
+    */
+
+
+    sockRef.emit('state changed', Constants.STATE_ROOM_READY);
 }
