@@ -22,5 +22,6 @@
     "gpio": "^0.2.10",
     "require": "^2.4.20",
     "socket.io": "^2.2.0"
-  }
+  },
+  "devDependencies": {}
 }
