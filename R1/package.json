@@ -20,6 +20,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "gpio": "^0.2.10",
+    "hdmi-cec": "^0.2.8",
     "require": "^2.4.20",
     "socket.io": "^2.2.0"
   },

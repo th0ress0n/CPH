@@ -23,6 +23,25 @@ var Constants = {
     SENSOR_SEAT_TOLERANCE_DIST              : 3000
 }
 
+
+
+// CEC utils - Required to detect TV on and off via HDMI ----------------
+// ----------------------------------------------------------------------
+var cecRemote = require('hdmi-cec').Remote;
+var remote = new cecRemote();
+
+remote.on('keypress', function(evt) {
+    console.log('user pressed the key "'+ evt.key + '" with code "' + evt.keyCode + '"');
+});
+
+remote.on('keypress.select', function() {
+    console.log('user pressed the select key!');
+});
+// End CEC section ------------------------------------------------------
+// ----------------------------------------------------------------------
+
+
+
 // Setup basic express server
 var express = require('express');
 var app = express();
