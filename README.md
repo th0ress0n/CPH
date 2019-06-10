@@ -55,7 +55,7 @@ Yellow | Digital IO | PIN 32-BCM12
 ### Ultrasonic sensor - Proximity
 ###### Ultrasonic Proximity sensor - HC SR501
 ![Ultrasonic Wiring schema](https://raw.githubusercontent.com/fivdi/pi-io/master/doc/hc-sr04-two-pin.png)
-Red | 5V 
-Black | Ground 
-Green | Trigger (Pin 23)
-Blue | Echo (Pin 24)
+Red | 5V  
+Black | Ground  
+Green | Trigger (Pin 23)  
+Blue | Echo (Pin 24)  
