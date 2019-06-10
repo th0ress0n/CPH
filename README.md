@@ -39,3 +39,14 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 * 1x Class 10 SD card - 16Gb or larger.
 * 1x GPIO Bridge
 * 1x Prototyping board
+
+
+
+### PIR
+![PIR Wiring schema](https://cdn-images-1.medium.com/max/1200/1*AmU7xRv5dE3SHJxzUCQfNQ.png)
+
+
+Color | Function | Pi PIN number
+Black | Ground | PIN 34
+Red | 5V | PIN 4
+Yellow | Digital IO | PIN 32-BCM12
