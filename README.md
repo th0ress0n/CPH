@@ -50,7 +50,7 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 Color | Function | Pi PIN number   
 Black | Ground | PIN 34  
 Red | 5V | PIN 4  
-Yellow | Digital IO | PIN 32-BCM12  
+Yellow | Digital IO | PIN 32-BCM12    
 
 ### Ultrasonic sensor - Proximity
 ###### Ultrasonic Proximity sensor - HC SR501
