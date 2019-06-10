@@ -20,9 +20,12 @@
   "dependencies": {
     "express": "^4.17.1",
     "gpio": "^0.2.10",
-    "node-cec": "^0.1.2",
+    "johnny-five": "^1.1.0",
+    "onoff": "^4.1.1",
+    "pi-io": "^1.0.1",
     "require": "^2.4.20",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "systeminformation": "^4.9.0"
   },
   "devDependencies": {}
 }
