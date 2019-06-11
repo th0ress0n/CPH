@@ -1,6 +1,7 @@
 $(function() {
     var Constants = {
         STATE_INIT                              : "INIT",
+        STATE_RESET                             : "RESET",
         STATE_ROOM_READY                        : "ROOM READY",
         STATE_ROOM_ENTERED                      : "ROOM ENTERED",
         STATE_ROOM_ENTERED_UNSEATED             : "ROOM ENTERED UNSEATED",
@@ -91,6 +92,9 @@ $(function() {
         currentState = state
 
         switch (currentState) {
+            case Constants.STATE_RESET:
+                // restore the chaos to idle
+            break;
             case Constants.STATE_INIT:
                 // Check that all is setup and ready to go: 
                 // If ready - move to next step ->
@@ -100,7 +104,7 @@ $(function() {
             break;
             case Constants.STATE_ROOM_READY:
                 // init Door sensor and start listening for entrants.
-                
+                socket.emit('state', Constants.STATE_ROOM_READY);
             break;
             case Constants.STATE_ROOM_ENTERED:
                 // Audio to prompt user to sit down.
