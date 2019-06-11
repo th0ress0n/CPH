@@ -1,5 +1,6 @@
 var Constants = {
     STATE_INIT                              : "INIT",
+    STATE_RESET                             : "RESET",
     STATE_ROOM_READY                        : "ROOM READY",
     STATE_ROOM_ENTERED                      : "ROOM ENTERED",
     STATE_ROOM_ENTERED_UNSEATED             : "ROOM ENTERED UNSEATED",
@@ -165,7 +166,7 @@ function userLeft(){
     motionlessInt = setInterval( 
         function(){ 
             // cancel room entry and revert back to idle
-            
+            sockRef.emit('state changed', Constants.STATE_RESET);
         ); 
     }, MOTIONLESS_TIMER);
 }
@@ -181,6 +182,7 @@ function doorWatch(){
    pir.watch(function(err, value) {
         if (value == 1) {
             if(Constants.STATE_ROOM_READY){
+                clearInterval(motionlessInt);
                 console.log("Motion Detected")
                 sockRef.emit('state changed', Constants.STATE_ROOM_ENTERED);
             }
@@ -188,6 +190,7 @@ function doorWatch(){
         } else {
             if(Constants.STATE_ROOM_READY){
                 console.log("No Motion present");
+                userLeft();
             }
         }
     });
