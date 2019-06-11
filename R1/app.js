@@ -30,7 +30,7 @@ const si = require('systeminformation');
 var five = require('johnny-five');
 var PiIO = require('pi-io');
 var gpio = require('onoff').Gpio;
-var gpio = require("gpio"); // GPIO !!
+// var gpio = require("gpio"); // GPIO !!
 // Setup basic express server
 var express = require('express');
 var app = express();
@@ -73,7 +73,7 @@ board.on('ready', function() {
     });
    
     proximity.on("change", function() {
-        console.log("cm: ", this.cm);
+        // console.log("Distance cm: ", this.cm);
     });
 });
 // ----------------------------------------------------------------------
@@ -82,12 +82,15 @@ board.on('ready', function() {
 
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
-var pir = new gpio(12, 'in', 'both');
+var pir = new gpio(19, 'in', 'both');
 pir.watch(function(err, value) {
     if (value == 1) {
-        sendMessage('Intruder alert');
+        if(Constants.STATE_ROOM_READY){
+            console.log("Motion Detected")
+        }
+        
     } else {
-        sendMessage('Intruder gone');
+        console.log("No Motion present");
     }
 });
 // ----------------------------------------------------------------------
