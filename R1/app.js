@@ -12,6 +12,9 @@ var Constants = {
     STATE_ROOM_VIDEO_FINISHED               : "ROOM VIDEO FINISHED",
     STATE_ROOM_EXIT_SEQUENCE                : "ROOM EXIT SEQUENCE",
     
+    CAMERA_SNAP                             : "CAMERA SNAP PHOTO",
+    ACTIVATE_PROXIMITY_SENSOR               : "ACTIVATE PROXIMITY SENSOR",
+    DEACTIVATE_PROXIMITY_SENSOR             : "DEACTIVATE PROXIMITY SENSOR",
     SENSOR_DOOR_TRIGGERED                   : "DOOR SENSOR TRIGGERED",
     SENSOR_SEATING_TRIGGERED                : "SEATING SENSOR TRIGGERED",
 
@@ -21,7 +24,7 @@ var Constants = {
     SENSOR_DOOR_TOLERANCE_DIST              : 3000,
     SENSOR_DOOR_TOL_DURATION                : 1200,
 
-    SENSOR_SEAT_TOLERANCE_DIST              : 3000
+    SENSOR_SEAT_TOLERANCE_DIST              : 40
 }
 
 
@@ -31,6 +34,9 @@ const si = require('systeminformation');
 var five = require('johnny-five');
 var PiIO = require('pi-io');
 var gpio = require('onoff').Gpio;
+
+var RaspiCam = require("raspicam");
+
 // Setup basic express server
 var express = require('express');
 var app = express();
@@ -39,6 +45,8 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 
+var currentState = Constants.STATE_INIT;
+
 // ------- MOTION DETECTION
 var pir = new gpio(19, 'in', 'both');
 var motionlessInt = null
@@ -46,7 +54,43 @@ const MOTIONLESS_TIMER = 60000; // One minute to trip unless cancelled
 // ------- PROXIMITY DETECTION
 var board = new five.Board({ io: new PiIO() });
 var proximityStack = []
+var averageDist = 0;
+// ------- CAMERA
+var camera = null;
 
+
+
+
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+var proximity = new five.Proximity({
+    controller: PiIO.HCSR04, // Custom controller
+    triggerPin: 'GPIO23',
+    echoPin: 'GPIO24'
+});
+
+board.on('ready', function() {
+    console.log("---GPIO BOARD READY---")
+    proximity.on("change", function() {
+        // console.log("Distance cm: ", this.cm);
+        if(currentState == Constants.STATE_ROOM_ENTERED_UNSEATED){
+            // Get 10 messurements and check the average, if average is less than the desired distance , the user has sat down
+            proximityStack.push(this.cm);
+            if(proximityStack.length>10){proximityStack.shift()};
+            var total = 0;
+            for(var i = 0; i < proximityStack.length; ++i){ total += proximityStack[i] };
+            averageDist = Math.round(total/proximityStack.length);
+            console.log(total+" on average /10 : "+averageDist);
+            // Meassure towards the config tolerance
+            if(averageDist!=0 && averageDist<Constants.SENSOR_SEAT_TOLERANCE_DIST){
+                // User is seated, switch state and proceed.
+                sockRef.emit('sensor event', Constants.SENSOR_SEATING_TRIGGERED);
+            }
+        }
+    });
+});
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
 
 
 
@@ -84,7 +128,7 @@ io.on('connection', (socket) => {
 
     sockRef = socket
 
-    socket.volatile.emit('init', Constants.STATE_ROOM_READY);
+    // socket.volatile.emit('init', Constants.STATE_ROOM_READY);
 
     // Bounce to startup ->
     socket.on('startup', (data) => {
@@ -94,48 +138,31 @@ io.on('connection', (socket) => {
 
     socket.on('state', (data) => {
         console.log("STATE -->> "+data)
+
+        currentState = data;
+
         switch(data){
             case Constants.STATE_INIT:
                 // configure door sensor and start messuring
-                doorWatch()
+                sockRef.emit('state changed', Constants.STATE_ROOM_READY);
             break;
             case Constants.STATE_ROOM_READY:
-
+                doorWatch()
             break;
             case Constants.STATE_ROOM_ENTERED:
-
-                board.on('ready', function() {
-                    console.log("---GPIO BOARD READY---")
-                    var proximity = new five.Proximity({
-                        controller: PiIO.HCSR04, // Custom controller
-                        triggerPin: 'GPIO23',
-                        echoPin: 'GPIO24'
-                    });
-                    
-                    proximity.on("change", function() {
-                        // console.log("Distance cm: ", this.cm);
-
-                        // Get 10 messurements and check the average, if average is less than the desired distance , the user has sat down
-                        proximityStack.push(this.cm);
-                        if(proximityStack.length>10){proximityStack.shift()};
-                        var total = 0;
-                        for(var i = 0; i < proximityStack.length; ++i){ total += proximityStack[i] };
-                        console.log(total+" on average /10 : "+total/proximityStack.length);
-
-                    });
-                });
                 
             break;
             case Constants.STATE_ROOM_ENTERED_UNSEATED:
-
+                // State bounced from Client
             break;
             case Constants.STATE_ROOM_USER_SEATED:
                 // once user is seated we dont need the motion sensor anymore
                 pir.unwatch(); // stop listening on the motion detection.
+                
 
             break;
             case Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE:
-
+                // Nothing on serverside for this state
             break;
             case Constants.STATE_ROOM_TV_ACTIVATED:
 
@@ -152,6 +179,17 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('sensor event', (data) => {
+        switch(data){
+            case Constants.ACTIVATE_PROXIMITY_SENSOR:
+
+            break;
+            case Constants.CAMERA_SNAP:
+                snapPhoto();
+            break;
+        }
+    });
+
     
   
     // when the user disconnects.. perform this
@@ -163,38 +201,71 @@ io.on('connection', (socket) => {
 
 function userLeft(){
     // set interval when motion is not present. If motionless for more than 1 minute, assume the user left the room
-    motionlessInt = setInterval( 
-        function(){ 
-            // cancel room entry and revert back to idle
-            sockRef.emit('state changed', Constants.STATE_RESET);
-        ); 
-    }, MOTIONLESS_TIMER);
+    motionlessInt = setInterval( function(){ sockRef.emit('state changed', Constants.STATE_RESET) }, MOTIONLESS_TIMER);
+}
+
+function snapPhoto(){
+    var timestamp = new Date().getTime().toString();
+    var camera = new RaspiCam({  
+        mode: 'photo',
+        encoding: 'png',
+        output: './public/img/'+timestamp+'_img.png',
+        brightness: 60,
+        timeout: 0,
+        opacity: 0
+    });
+    
+    //to take a snapshot, start a timelapse or video recording
+    camera.start( );
+
+    camera.on("start", function(){
+        //do stuff
+    });
+
+    //listen for the "read" event triggered when each new photo/video is saved
+    camera.on("read", function(err, timestamp, filename){ 
+        //get the photo and pass to client
+        if(filename){
+            sockRef.emit('load photo', {time: timestamp, file: filename} );
+            camera.stop();
+        }
+        if(err){
+            console.log("Error taking photo: "+err);
+        }
+    });
+
+    
+    camera.on("stop", function(){
+        //listen for the "stop" event triggered when the stop method was called
+    });
+
+    
+    camera.on("exit", function(){
+        //listen for the process to exit when the timeout has been reached
+    });
 }
 
 
 function doorWatch(){
-    console.log("DOORWATCH")
+    console.log("DOORWATCH : "+currentState)
     /*
     Setup listener for the GPIO and the door sensor
     incomming signal is located on PIN ?
     */
-   
    pir.watch(function(err, value) {
         if (value == 1) {
-            if(Constants.STATE_ROOM_READY){
+            if(currentState == Constants.STATE_ROOM_READY || currentState == Constants.STATE_ROOM_ENTERED){
                 clearInterval(motionlessInt);
                 console.log("Motion Detected")
-                sockRef.emit('state changed', Constants.STATE_ROOM_ENTERED);
+                sockRef.emit('sensor event', Constants.SENSOR_DOOR_TRIGGERED);
             }
             
         } else {
-            if(Constants.STATE_ROOM_READY){
+            if(currentState == Constants.STATE_ROOM_READY || currentState == Constants.STATE_ROOM_ENTERED){
                 console.log("No Motion present");
-                userLeft();
+                if(motionlessInt!=null){ userLeft() };
             }
         }
     });
-  
 
-    sockRef.emit('state changed', Constants.STATE_ROOM_READY);
 }

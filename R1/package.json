@@ -23,6 +23,7 @@
     "johnny-five": "^1.1.0",
     "onoff": "^4.1.1",
     "pi-io": "^1.0.1",
+    "raspicam": "^0.2.14",
     "require": "^2.4.20",
     "socket.io": "^2.2.0",
     "systeminformation": "^4.9.0"

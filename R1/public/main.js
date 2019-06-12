@@ -13,6 +13,9 @@ $(function() {
         STATE_ROOM_VIDEO_FINISHED               : "ROOM VIDEO FINISHED",
         STATE_ROOM_EXIT_SEQUENCE                : "ROOM EXIT SEQUENCE",
 
+        CAMERA_SNAP                             : "CAMERA SNAP PHOTO",
+        ACTIVATE_PROXIMITY_SENSOR               : "ACTIVATE PROXIMITY SENSOR",
+        DEACTIVATE_PROXIMITY_SENSOR             : "DEACTIVATE PROXIMITY SENSOR",
         SENSOR_DOOR_TRIGGERED                   : "DOOR SENSOR TRIGGERED",
         SENSOR_SEATING_TRIGGERED                : "SEATING SENSOR TRIGGERED",
 
@@ -45,8 +48,10 @@ $(function() {
     // Initialize variables
     var $window = $(window);
 
+    // Containers
     var $debug = $('.debugger');
     var $debugState = $('.stateField');
+    var $photo = $('.camSnap');
 
     var seated = false;                         // Used to handle audio loop to seat user after entering the room
     var tv_activated = false;
@@ -54,10 +59,8 @@ $(function() {
     var stateLog = new Array();
     var currentState = Constants.STATE_INIT;
 
-    // var socket = io();
     const socket = io.connect("http://localhost:3000", { secure: false, reconnect: true, rejectUnauthorized: false });
     var connected = false;
-    var userSeated = false;
     
     // load video
     var player = new Clappr.Player({source: "./video/HKFA 29th Pt3.mp4", parentId: "#player",width:"100%", height:"100%"});
@@ -107,24 +110,35 @@ $(function() {
                 socket.emit('state', Constants.STATE_ROOM_READY);
             break;
             case Constants.STATE_ROOM_ENTERED:
+                // Emit state back to server to confirm the state - Cancel motion detection
+                socket.emit('state', Constants.STATE_ROOM_ENTERED);
                 // Audio to prompt user to sit down.
                 playAudio(Constants.TRACK_PLEASE_SIT_ROOM_1, currentVolume);
                 audio_state = Constants.AUDIO_PLEASE_SIT_ROOM_1;
                 // start listening for seating sensor to trigger
-
+                socket.emit('sensor event', Constants.ACTIVATE_PROXIMITY_SENSOR)
                 // once audio is played -> if no trigger is tripped, start the audio prompting loop with increased audio for each iteration.
 
                 // setTimeout(function(){ setState(Constants.STATE_ROOM_ENTERED_UNSEATED) }, 3000); // temp
             break;
             case Constants.STATE_ROOM_ENTERED_UNSEATED:
                 // manage prompting cycle and audio volume increase
-
+                socket.emit('state', Constants.STATE_ROOM_ENTERED_UNSEATED);
             break;
             case Constants.STATE_ROOM_USER_SEATED:
+                seated = true;
+                // bounce state to server to stopp sensor polling
+                socket.emit('state', Constants.STATE_ROOM_USER_SEATED);
                 // snap photo and process for overlay
+                socket.emit('sensor event', Constants.CAMERA_SNAP);
             break;
             case Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE:
-
+                    socket.emit('state', Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE);
+                    // Start the loop of prompting user to turn on TV
+                    currentVolume = defaultAudio
+                    playAudio(Constants.TRACK_ACTIVATE_TV_ROOM_1, currentVolume);
+                    audio_state = Constants.AUDIO_ACTIVATE_TV_ROOM_1;
+                    // start listening for TV activation
             break;
             case Constants.STATE_ROOM_TV_ACTIVATED:
                 // Start video - stop all sensor processing until video is done.
@@ -161,23 +175,31 @@ $(function() {
             });
             
             sound.once('load', function(){
-                    console.log('Playback resumed successfully');
-                    sound.volume = volume;
-                    sound.play();
+                if(Constants.MODE_DEBUG){ console.log('Playback resumed successfully') };
+                sound.volume = volume;
+                sound.play();
             });
             
             sound.on('end', function(){
                 sound.unload()
-                console.log('Finished!');
+                if(Constants.MODE_DEBUG){ console.log('SOUND END -> Finished!') };
                 // handle next depending on state
                 if(audio_state==Constants.AUDIO_PLEASE_SIT_ROOM_1 && currentState==Constants.STATE_ROOM_ENTERED){
                     setState(Constants.STATE_ROOM_ENTERED_UNSEATED);
                 }
     
-                console.log("currentState "+currentState)
-                if(currentState==Constants.STATE_ROOM_ENTERED_UNSEATED && currentVolume<1){
-                    currentVolume = currentVolume+0.1
-                    setTimeout(function(){ playAudio(Constants.TRACK_PLEASE_SIT_ROOM_1, currentVolume) }, 1000 );
+                if(Constants.MODE_DEBUG){ console.log("SOUND END -> currentState : "+currentState) }
+
+                currentVolume = currentVolume+0.1
+                if(currentVolume>1){currentVolume=1};
+
+                // LOOP for TRACK_PLEASE_SIT_ROOM_1
+                if(currentState==Constants.STATE_ROOM_ENTERED_UNSEATED && currentVolume<=1){
+                    setTimeout(function(){ playAudio(Constants.TRACK_PLEASE_SIT_ROOM_1, currentVolume) }, 2000 );
+                }
+                // LOOP for 
+                if(currentState==Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE && currentVolume<=1){
+                    setTimeout(function(){ playAudio(Constants.TRACK_ACTIVATE_TV_ROOM_1, currentVolume) }, 2000 );
                 }
             });
 
@@ -188,15 +210,25 @@ $(function() {
     // ----- Socket handling ---------------------------
 
     socket.on('sensor event', (data) => {
-        switch(data.event){
+        switch(data){
             case Constants.SENSOR_DOOR_TRIGGERED:
+                if(Constants.MODE_DEBUG){ console.log("SENSOR_DOOR_TRIGGERED ------->>>>>") };
                 setState(Constants.STATE_ROOM_ENTERED);
             break;
             case Constants.SENSOR_SEATING_TRIGGERED:
                 setState(Constants.STATE_ROOM_USER_SEATED);
             break;
         }
-        console.log("SOCKET _ SENSOR EVENT: "+data.event)
+        console.log("SOCKET _ SENSOR EVENT: "+data);
+    });
+
+    socket.on('load photo', (data) => {
+        if(Constants.MODE_DEBUG){ console.log("CAMERA OBJECT : "+data.file+"  -->> "+data.time) };
+        var img = document.createElement("IMG");
+        if(Constants.MODE_DEBUG){ console.log("IMAGE CREATED "+img) };
+        img.src = "/img/"+data.file;
+        document.getElementById('photo').appendChild(img);
+        setState(Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE);
     });
 
     socket.on('state changed', (data) => {
