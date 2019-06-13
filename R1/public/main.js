@@ -88,7 +88,7 @@ $(function() {
         while (stateLog.length > 5) {
             stateLog.shift();
         }
-        if(Constants.MODE_DEBUG){console.log("State changed to "+state)}
+        if(Constants.MODE_DEBUG){ console.log("State changed to "+state) }
     }
 
     function setState(state) {
@@ -143,17 +143,31 @@ $(function() {
                     socket.emit('sensor event', Constants.CAMERA_SNAP);
             break;
             case Constants.STATE_ROOM_TV_ACTIVATED:
+                // bounce state to server to avoid double triggers
+                socket.emit('state', Constants.STATE_ROOM_TV_ACTIVATED);
                 // Start video - stop all sensor processing until video is done.
+                afterglow.getPlayer('player').play();
+                afterglow.getPlayer('player').volume(.5);
+                afterglow.on('player','play', function(){ 
+                    setState(Constants.STATE_ROOM_VIDEO_PLAYING);
+                });
             break;
             case Constants.STATE_ROOM_VIDEO_PLAYING:
-
+                socket.emit('state', Constants.STATE_ROOM_VIDEO_PLAYING);
+                afterglow.on('player','ended', function(){ 
+                    setState(Constants.STATE_ROOM_VIDEO_FINISHED);
+                });
             break;
             case Constants.STATE_ROOM_VIDEO_FINISHED:
-
+                socket.emit('state', Constants.STATE_ROOM_VIDEO_FINISHED);
+                setState(Constants.STATE_ROOM_EXIT_SEQUENCE);
             break;
             case Constants.STATE_ROOM_EXIT_SEQUENCE:
+                socket.emit('state', Constants.STATE_ROOM_EXIT_SEQUENCE);
                 // Play audio sequence - set timer for post exit reset.
-
+                currentVolume = defaultAudio
+                playAudio(Constants.TRACK_PLEASE_EXIT_ROOM_1, currentVolume);
+                audio_state = Constants.AUDIO_PLEASE_EXIT_ROOM_1;
             break;
         }
         // append to history
@@ -199,9 +213,13 @@ $(function() {
                 if(currentState==Constants.STATE_ROOM_ENTERED_UNSEATED && currentVolume<=1){
                     setTimeout(function(){ playAudio(Constants.TRACK_PLEASE_SIT_ROOM_1, currentVolume) }, 2000 );
                 }
-                // LOOP for 
+                // LOOP for ACTIVATE TV
                 if(currentState==Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE && currentVolume<=1){
                     setTimeout(function(){ playAudio(Constants.TRACK_ACTIVATE_TV_ROOM_1, currentVolume) }, 2000 );
+                }
+
+                if(currentState==Constants.STATE_ROOM_EXIT_SEQUENCE && currentVolume<=1){
+                    setTimeout(function(){ playAudio(Constants.TRACK_PLEASE_EXIT_ROOM_1, currentVolume) }, 2000 );
                 }
             });
 
@@ -221,7 +239,7 @@ $(function() {
                 setState(Constants.STATE_ROOM_USER_SEATED);
             break;
         }
-        console.log("SOCKET _ SENSOR EVENT: "+data);
+        if(Constants.MODE_DEBUG){ console.log("SOCKET _ SENSOR EVENT: "+data) };
     });
 
     socket.on('load photo', (data) => {
@@ -234,22 +252,22 @@ $(function() {
     });
 
     socket.on('state changed', (data) => {
-        console.log("RECEIVED STATE CHANGE FROM SERVER!")
+        if(Constants.MODE_DEBUG){ console.log("RECEIVED STATE CHANGE FROM SERVER!") };
         setState(data);
     });
 
     socket.on('init', (data) => {
-        console.log("init : "+data)
+        if(Constants.MODE_DEBUG){ console.log("init : "+data) };
         setState(Constants.STATE_INIT);
     });
 
     socket.on('disconnect', () => {
-        console.log('you have been disconnected');
+        if(Constants.MODE_DEBUG){ console.log('you have been disconnected') };
         connected = false;
       });
     
     socket.on('reconnect', () => {
-        console.log('you have been reconnected');
+        if(Constants.MODE_DEBUG){ console.log('you have been reconnected') };
         // If connected is true
         if(!connected){
             socket.emit('startup', "init");
@@ -258,18 +276,18 @@ $(function() {
     });
 
     socket.on('reconnect_error', () => {
-        console.log('attempt to reconnect has failed');
+        if(Constants.MODE_DEBUG){ console.log('attempt to reconnect has failed') };
         connected = false;
     });
 
     socket.on('connection', function() { 
-        console.log("client connected");
+        if(Constants.MODE_DEBUG){ console.log("client connected") };
         connected = true;
         socket.emit('startup', "init");
     });
 
-    socket.on('connect_error', function(err) { console.log("client connect_error: ", err) });
+    socket.on('connect_error', function(err) { if(Constants.MODE_DEBUG){ console.log("client connect_error: ", err) } });
 
-    socket.on('connect_timeout', function(err) { console.log("client connect_timeout: ", err) });
+    socket.on('connect_timeout', function(err) { if(Constants.MODE_DEBUG){ console.log("client connect_timeout: ", err) } });
 
 });

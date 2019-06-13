@@ -64,30 +64,31 @@ var camera = null;
 
 
 // TV state -------------------------------------------------------------
-var exec = require('child_process').exec;
-var tvOn = Constants.TV_STATE_HDMI_ACTIVE
-
+var tvOn = null
 var child_process = require('child_process');
 var cmd = 'tvservice';
 var value = ['-M'];
 var opt = { };
-
 var child = child_process.spawn(cmd, value, opt);
 
 child.stdout.on('data', function (data) { console.log('stdout data' + data) });
 
 child.stderr.on('data', function (data) {
-    console.log('test:'+data);
+    if(Constants.MODE_DEBUG){ console.log('HDMI triggered: '+data) };
     switch(data.toString()){
         case Constants.TV_STATE_HDMI_ACTIVE:
-            console.log("TV ON !!!!!")
+            if(Constants.MODE_DEBUG){ console.log("TV ON !!!!!") };
+            tvOn = true;
+            if( currentState==Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE  ){
+                sockRef.emit('state changed', Constants.STATE_ROOM_TV_ACTIVATED);
+            }
         break;
         case Constants.TV_STATE_HDMI_UNPLUGGED:
-            console.log("TV OFF !!!!!")
+            if(Constants.MODE_DEBUG){ console.log("TV OFF !!!!!") };
+            tvOn = false
         break;
     }
 });
-
 child.on('close', function (code) { console.log("child - on close") });
 // ----------------------------------------------------------------------
 
@@ -101,7 +102,7 @@ var proximity = new five.Proximity({
 });
 
 board.on('ready', function() {
-    console.log("---GPIO BOARD READY---")
+    if(Constants.MODE_DEBUG){ console.log("---GPIO BOARD READY---") };
     proximity.on("change", function() {
         // console.log("Distance cm: ", this.cm);
         if(currentState == Constants.STATE_ROOM_ENTERED_UNSEATED){
@@ -124,12 +125,6 @@ board.on('ready', function() {
 // ----------------------------------------------------------------------
 
 
-
-// ----------------------------------------------------------------------
-// ----------------------------------------------------------------------
-
-
-
 // wide reference
 var sockRef = null; 
 
@@ -146,16 +141,14 @@ io.on('connection', (socket) => {
 
     sockRef = socket
 
-    // socket.volatile.emit('init', Constants.STATE_ROOM_READY);
-
     // Bounce to startup ->
     socket.on('startup', (data) => {
-        console.log("startup "+data)
+        if(Constants.MODE_DEBUG){ console.log("startup "+data) };
         socket.emit('init', "init");
     });
 
     socket.on('state', (data) => {
-        console.log("STATE -->> "+data)
+        if(Constants.MODE_DEBUG){ console.log("STATE -->> "+data) };
 
         currentState = data;
 
@@ -163,13 +156,12 @@ io.on('connection', (socket) => {
             case Constants.STATE_INIT:
                 // configure door sensor and start messuring
                 sockRef.emit('state changed', Constants.STATE_ROOM_READY);
-                
             break;
             case Constants.STATE_ROOM_READY:
                 doorWatch()
             break;
             case Constants.STATE_ROOM_ENTERED:
-                
+                // handled by sensor.
             break;
             case Constants.STATE_ROOM_ENTERED_UNSEATED:
                 // State bounced from Client
@@ -177,8 +169,6 @@ io.on('connection', (socket) => {
             case Constants.STATE_ROOM_USER_SEATED:
                 // once user is seated we dont need the motion sensor anymore
                 pir.unwatch(); // stop listening on the motion detection.
-                
-
             break;
             case Constants.STATE_ROOM_USER_SEATED_PHOTO_DONE:
                 // Nothing on serverside for this state
@@ -216,15 +206,13 @@ io.on('connection', (socket) => {
   
     // when the user disconnects.. perform this
     socket.on('disconnect', () => {
-        console.log("server disconnected.")
+        if(Constants.MODE_DEBUG){ console.log("server disconnected.") };
     });
 });
 
 
-function userLeft(){
-    // set interval when motion is not present. If motionless for more than 1 minute, assume the user left the room
-    motionlessInt = setInterval( function(){ sockRef.emit('state changed', Constants.STATE_RESET) }, MOTIONLESS_TIMER);
-}
+
+// ------ CAMERA  -------------------------------------------------------------------------
 
 function snapPhoto(){
     var timestamp = new Date().getTime().toString();
@@ -239,11 +227,11 @@ function snapPhoto(){
     
     //to take a snapshot, start a timelapse or video recording
     camera.start( );
-
+    
     camera.on("start", function(){
         //do stuff
     });
-
+    
     //listen for the "read" event triggered when each new photo/video is saved
     camera.on("read", function(err, timestamp, filename){ 
         //get the photo and pass to client
@@ -252,21 +240,28 @@ function snapPhoto(){
             camera.stop();
         }
         if(err){
-            console.log("Error taking photo: "+err);
+            if(Constants.MODE_DEBUG){ console.log("Error taking photo: "+err) };
         }
     });
-
+    
     
     camera.on("stop", function(){
         //listen for the "stop" event triggered when the stop method was called
     });
-
+    
     
     camera.on("exit", function(){
         //listen for the process to exit when the timeout has been reached
     });
 }
 
+
+// ------ DOOR  -------------------------------------------------------------------------
+
+function userLeft(){
+    // set interval when motion is not present. If motionless for more than 1 minute, assume the user left the room
+    motionlessInt = setInterval( function(){ sockRef.emit('state changed', Constants.STATE_RESET) }, MOTIONLESS_TIMER);
+}
 
 function doorWatch(){
     console.log("DOORWATCH : "+currentState)
@@ -275,16 +270,16 @@ function doorWatch(){
     incomming signal is located on PIN ?
     */
    pir.watch(function(err, value) {
-        if (value == 1) {
+       if (value == 1) {
             if(currentState == Constants.STATE_ROOM_READY || currentState == Constants.STATE_ROOM_ENTERED){
                 clearInterval(motionlessInt);
-                console.log("Motion Detected")
+                if(Constants.MODE_DEBUG){ console.log("Motion Detected") };
                 sockRef.emit('sensor event', Constants.SENSOR_DOOR_TRIGGERED);
             }
             
         } else {
             if(currentState == Constants.STATE_ROOM_READY || currentState == Constants.STATE_ROOM_ENTERED){
-                console.log("No Motion present");
+                if(Constants.MODE_DEBUG){ console.log("No Motion present") };
                 if(motionlessInt!=null){ userLeft() };
             }
         }
