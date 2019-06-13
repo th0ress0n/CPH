@@ -17,6 +17,10 @@ var Constants = {
     DEACTIVATE_PROXIMITY_SENSOR             : "DEACTIVATE PROXIMITY SENSOR",
     SENSOR_DOOR_TRIGGERED                   : "DOOR SENSOR TRIGGERED",
     SENSOR_SEATING_TRIGGERED                : "SEATING SENSOR TRIGGERED",
+    ACTIVATE_TV_SENSOR                      : "ACTIVATE TV SENSOR",
+
+    TV_STATE_HDMI_UNPLUGGED                 : "[I] HDMI cable is unplugged",
+    TV_STATE_HDMI_ACTIVE                    : "[I] HDMI is attached",
 
     API_BASE_PATH                           : "",
     MODE_DEBUG                              : true,
@@ -59,6 +63,33 @@ var averageDist = 0;
 var camera = null;
 
 
+// TV state -------------------------------------------------------------
+var exec = require('child_process').exec;
+var tvOn = Constants.TV_STATE_HDMI_ACTIVE
+
+var child_process = require('child_process');
+var cmd = 'tvservice';
+var value = ['-M'];
+var opt = { };
+
+var child = child_process.spawn(cmd, value, opt);
+
+child.stdout.on('data', function (data) { console.log('stdout data' + data) });
+
+child.stderr.on('data', function (data) {
+    console.log('test:'+data);
+    switch(data.toString()){
+        case Constants.TV_STATE_HDMI_ACTIVE:
+            console.log("TV ON !!!!!")
+        break;
+        case Constants.TV_STATE_HDMI_UNPLUGGED:
+            console.log("TV OFF !!!!!")
+        break;
+    }
+});
+
+child.on('close', function (code) { console.log("child - on close") });
+// ----------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------
@@ -94,20 +125,7 @@ board.on('ready', function() {
 
 
 
-
-
-
-// CEC utils - Required to detect TV on and off via HDMI ----------------
 // ----------------------------------------------------------------------
-// setInterval(function() {
-//     si.graphics().then(data => {
-//         console.log("---------")
-//         console.log(data.displays.length);
-//         console.log(data.displays[0].connection);
-//         console.log(data.displays[0].currentRefreshRate);
-//     })
-// }, 1000)
-// End CEC section ------------------------------------------------------
 // ----------------------------------------------------------------------
 
 
@@ -145,6 +163,7 @@ io.on('connection', (socket) => {
             case Constants.STATE_INIT:
                 // configure door sensor and start messuring
                 sockRef.emit('state changed', Constants.STATE_ROOM_READY);
+                
             break;
             case Constants.STATE_ROOM_READY:
                 doorWatch()
@@ -186,6 +205,9 @@ io.on('connection', (socket) => {
             break;
             case Constants.CAMERA_SNAP:
                 snapPhoto();
+            break;
+            case Constants.ACTIVATE_TV_SENSOR:
+                
             break;
         }
     });

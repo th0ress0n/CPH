@@ -18,6 +18,7 @@ $(function() {
         DEACTIVATE_PROXIMITY_SENSOR             : "DEACTIVATE PROXIMITY SENSOR",
         SENSOR_DOOR_TRIGGERED                   : "DOOR SENSOR TRIGGERED",
         SENSOR_SEATING_TRIGGERED                : "SEATING SENSOR TRIGGERED",
+        ACTIVATE_TV_SENSOR                      : "ACTIVATE TV SENSOR",
 
         API_BASE_PATH                           : "",
         MODE_DEBUG                              : true,
@@ -139,6 +140,7 @@ $(function() {
                     playAudio(Constants.TRACK_ACTIVATE_TV_ROOM_1, currentVolume);
                     audio_state = Constants.AUDIO_ACTIVATE_TV_ROOM_1;
                     // start listening for TV activation
+                    socket.emit('sensor event', Constants.CAMERA_SNAP);
             break;
             case Constants.STATE_ROOM_TV_ACTIVATED:
                 // Start video - stop all sensor processing until video is done.
