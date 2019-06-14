@@ -36,7 +36,16 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 * 1x 330Ω Resistor
 * 10x jumper wires
 
-
+#### NPM dependencies Room 1
+"express": "^4.17.1"  
+"gpio": "^0.2.10"  
+"johnny-five": "^1.1.0"  
+"onoff": "^4.1.1"  
+"pi-io": "^1.0.1"  
+"raspicam": "^0.2.14"  
+"require": "^2.4.20"  
+"socket.io": "^2.2.0"  
+"systeminformation": "^4.9.0"  
 
 #### Room 2 - Hardware checklist:
 * 1x Raspberry Pi 3 Model B+
