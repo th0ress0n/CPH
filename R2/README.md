@@ -5,6 +5,16 @@ Setup build:
 npm install
 ```
 
+## NPM dependencies
+"child_process": "^1.0.2"  
+"express": "^4.17.1"  
+"http": "0.0.0"  
+"johnny-five": "^1.1.0"  
+"onoff": "^4.1.1"  
+"path": "^0.12.7"  
+"pi-io": "^1.0.1"  
+"socket.io": "^2.2.0"
+
 ### Room 2 - Hardware checklist:
 * 1x Raspberry Pi 3 Model B+
 * 1x Class 10 SD card - 16Gb or larger.
