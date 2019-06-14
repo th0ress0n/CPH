@@ -10,6 +10,10 @@ npm install
 * 1x Class 10 SD card - 16Gb or larger.
 * 1x GPIO Bridge
 * 1x Prototyping board
+* 1x HC SR501 PIR Motion Sensor
+* 1x HC SR04 Ultrasonic Proximity sensor
+* 1x LM393 - Light sensor module with potetiometer
+* 1x SW-420 NC - Vibration Sensor Module (Optional and replacable with IR remote setup)
 
 
 
@@ -22,7 +26,7 @@ Red | 5V | PIN 4
 Yellow | Digital IO | PIN 32-BCM12  
 
 ### Ultrasonic sensor - Proximity  
-###### Ultrasonic Proximity sensor - HC SR501
+###### Ultrasonic Proximity sensor - HC SR04
 ![Ultrasonic Wiring schema](https://raw.githubusercontent.com/fivdi/pi-io/master/doc/hc-sr04-two-pin.png)
 Red | 5V  
 Black | Ground  
