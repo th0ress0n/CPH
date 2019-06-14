@@ -115,13 +115,14 @@ $(function() {
                 audio_state = Constants.AUDIO_TURN_ON_AC;
             break;
             case Constants.STATE_ROOM_AC_ACTIVATED:
+                socket.emit('state', Constants.STATE_ROOM_AC_ACTIVATED);
                 // -
             break;
             case Constants.STATE_ROOM_EXIT_SEQUENCE:
                 socket.emit('state', Constants.STATE_ROOM_EXIT_SEQUENCE);
                 currentVolume = defaultAudio
-                playAudio(Constants.TRACK_PLEASE_EXIT_ROOM_1, currentVolume);
-                audio_state = Constants.AUDIO_PLEASE_EXIT_ROOM_1;
+                playAudio(Constants.TRACK_PLEASE_EXIT_ROOM_2, currentVolume);
+                audio_state = Constants.AUDIO_PLEASE_EXIT_ROOM_2;
             break;
         }
         // append to history

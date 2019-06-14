@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
               
           break;
           case Constants.STATE_ROOM_AC_ACTIVATED:
-
+              sockRef.emit('state changed', Constants.STATE_ROOM_EXIT_SEQUENCE);
           break;
           case Constants.STATE_ROOM_EXIT_SEQUENCE:
 
