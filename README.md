@@ -36,13 +36,27 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 * 1x 330Ω Resistor
 * 10x jumper wires
 
-#### R2
+
+
+#### Room 2 - Hardware checklist:
 * 1x Raspberry Pi 3 Model B+
 * 1x Class 10 SD card - 16Gb or larger.
 * 1x GPIO Bridge
 * 1x Prototyping board
+* 1x HC SR501 PIR Motion Sensor
+* 1x HC SR04 Ultrasonic Proximity sensor
+* 1x LM393 - Light sensor module with potetiometer
+* 1x SW-420 NC - Vibration Sensor Module (Optional and replacable with IR remote setup)
 
-
+#### NPM dependencies Room 2
+"child_process": "^1.0.2"  
+"express": "^4.17.1"  
+"http": "0.0.0"  
+"johnny-five": "^1.1.0"  
+"onoff": "^4.1.1"  
+"path": "^0.12.7"  
+"pi-io": "^1.0.1"  
+"socket.io": "^2.2.0"
 
 ### PIR
 ###### Motion sensor - PIR Motion Sensor - HC SR501
