@@ -83,3 +83,11 @@ Red | 5V
 Black | Ground  
 Green | Trigger (Pin 23)  
 Blue | Echo (Pin 24)  
+
+#### Light sensor Module
+###### LM393 - Light sensor module with potetiometer
+![Light sensor wiring](http://www.uugear.com/wordpress/wp-content/uploads/2014/12/06.jpg)
+
+#### Vibration Sensor Module 
+###### SW-420 NC - WINGONEER - Vibration Sensor Module Vibration Switch
+![Vibration Sensor Module wiring](https://www.piddlerintheroot.com/wp-content/uploads/2017/06/vibration.png)
