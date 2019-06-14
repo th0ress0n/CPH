@@ -28,10 +28,11 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 #### R1
 * 1x Raspberry Pi 3 Model B+
 * 1x Class 10 SD card - 16Gb or larger.
-* 1x GPIO Bridge
+* 1x GPIO Bridge (Cobbler)
 * 1x Prototyping board
-* 1x PIR Motion Sensor - HC SR501
-* 2x Ultrasonic sensor - HC-SR04 
+* 1x HC SR501 PIR Motion Sensor
+* 1x HC SR04 Ultrasonic Proximity sensor
+* 1x Raspberry PI Camera v1/2
 * 1x 470Ω Resistor
 * 1x 330Ω Resistor
 * 10x jumper wires
@@ -50,7 +51,7 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 #### Room 2 - Hardware checklist:
 * 1x Raspberry Pi 3 Model B+
 * 1x Class 10 SD card - 16Gb or larger.
-* 1x GPIO Bridge
+* 1x GPIO Bridge (Cobbler)
 * 1x Prototyping board
 * 1x HC SR501 PIR Motion Sensor
 * 1x HC SR04 Ultrasonic Proximity sensor
