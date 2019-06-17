@@ -27,7 +27,7 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 
 #### R1
 * 1x Raspberry Pi 3 Model B+
-* 1x Class 10 SD card - 16Gb or larger.
+* 1x Class 10 microSD card - 16Gb or larger.
 * 1x GPIO Bridge (Cobbler)
 * 1x Prototyping board
 * 1x HC SR501 PIR Motion Sensor
@@ -50,7 +50,7 @@ NodeJS - follow these instructions: https://www.instructables.com/id/Install-Nod
 
 #### Room 2 - Hardware checklist:
 * 1x Raspberry Pi 3 Model B+
-* 1x Class 10 SD card - 16Gb or larger.
+* 1x Class 10 microSD card - 16Gb or larger.
 * 1x GPIO Bridge (Cobbler)
 * 1x Prototyping board
 * 1x HC SR501 PIR Motion Sensor
