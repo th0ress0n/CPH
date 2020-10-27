@@ -26,7 +26,7 @@
     "raspicam": "^0.2.14",
     "require": "^2.4.20",
     "socket.io": "^2.2.0",
-    "systeminformation": "^4.9.0"
+    "systeminformation": "^4.27.11"
   },
   "devDependencies": {}
 }
