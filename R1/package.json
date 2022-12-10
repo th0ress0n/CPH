@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/th0ress0n/CPH#readme",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "gpio": "^0.2.10",
     "johnny-five": "^1.1.0",
     "onoff": "^4.1.1",
